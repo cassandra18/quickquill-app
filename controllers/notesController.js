@@ -7,7 +7,7 @@ const getNotes = asyncHandler( async (req, res) => {
 
     const notes = await Note.find();
 
-    res.json(notes);
+    res.status(200).json(notes);
 
 });
 
@@ -18,6 +18,10 @@ const getNotes = asyncHandler( async (req, res) => {
 const createNote = asyncHandler( async (req, res) => {
     const { title, content } = req.body;
 
+    if(!title || !content) {
+        res.status(400);
+        throw new Error('please add add text fields');
+    }
     const newNote = await Note.create( {title, content });
 
     res.status(201).json(newNote);
@@ -29,21 +33,32 @@ const createNote = asyncHandler( async (req, res) => {
 
 const updateNote = asyncHandler( async (req, res) => {
     const { title, content } = req.body;
-    const noteId = req.params.id;
+    const note = await Note.findById(req.params.id);
 
-    const updatedNote = await Note.findByIdAndUpdate(noteId, { title, content }, { new: true });
+    if(!note) {
+        res.status(400)
+        throw new Error('Goal not found')
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(note, { title, content }, { new: true });
 
    
-    res.json(updatedNote)
+    res.status(200).json(updatedNote)
 });
 
 //delete notes
 //DELETE method
 
 const deleteNote = asyncHandler( async (req, res) => {
-    const noteId = req.params.id;
+    const note = await Note.findById(req.params.id);
 
-    const deletedNote = await Note.findByIdAndDelete(noteId);
+
+    if(!note) {
+        res.status(400)
+        throw new Error('Goal not found')
+    }
+
+    const deletedNote = await Note.findByIdAndDelete(note);
 
    
     if (deletedNote) {
